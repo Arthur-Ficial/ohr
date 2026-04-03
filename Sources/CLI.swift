@@ -53,27 +53,56 @@ func transcribeFileCommand(path: String, language: String?, timestamps: Bool) as
 
 /// Transcribe audio piped via stdin.
 func transcribeFromStdin(language: String?) async throws {
-    // Read all stdin data into a temporary file
-    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ohr-stdin-\(UUID().uuidString).wav")
-    defer { try? FileManager.default.removeItem(at: tempURL) }
-
-    var data = Data()
-    while let byte = readLine(strippingNewline: false)?.data(using: .utf8) {
-        data.append(byte)
-    }
-    // Also try reading raw bytes
-    if data.isEmpty {
-        let stdin = FileHandle.standardInput
-        data = stdin.readDataToEndOfFile()
-    }
+    // Read raw binary data from stdin directly (not readLine — that corrupts binary audio)
+    let data = FileHandle.standardInput.readDataToEndOfFile()
 
     guard !data.isEmpty else {
         printError("No data received from stdin")
         exit(exitUsageError)
     }
 
+    // Detect format from magic bytes, default to wav
+    let ext = detectFormatFromMagicBytes(data) ?? "wav"
+    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ohr-stdin-\(UUID().uuidString).\(ext)")
+    defer { try? FileManager.default.removeItem(at: tempURL) }
+
     try data.write(to: tempURL)
     try await transcribeFileCommand(path: tempURL.path, language: language, timestamps: false)
+}
+
+/// Detect audio format from magic bytes in the file header.
+private func detectFormatFromMagicBytes(_ data: Data) -> String? {
+    guard data.count >= 12 else { return nil }
+    let bytes = [UInt8](data.prefix(12))
+
+    // RIFF....WAVE = WAV
+    if bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46
+        && bytes[8] == 0x57 && bytes[9] == 0x41 && bytes[10] == 0x56 && bytes[11] == 0x45 {
+        return "wav"
+    }
+    // ID3 or 0xFF 0xFB = MP3
+    if (bytes[0] == 0x49 && bytes[1] == 0x44 && bytes[2] == 0x33)
+        || (bytes[0] == 0xFF && (bytes[1] & 0xE0) == 0xE0) {
+        return "mp3"
+    }
+    // fLaC = FLAC
+    if bytes[0] == 0x66 && bytes[1] == 0x4C && bytes[2] == 0x61 && bytes[3] == 0x43 {
+        return "flac"
+    }
+    // FORM....AIFF = AIFF
+    if bytes[0] == 0x46 && bytes[1] == 0x4F && bytes[2] == 0x52 && bytes[3] == 0x4D
+        && bytes[8] == 0x41 && bytes[9] == 0x49 && bytes[10] == 0x46 && bytes[11] == 0x46 {
+        return "aiff"
+    }
+    // caff = CAF
+    if bytes[0] == 0x63 && bytes[1] == 0x61 && bytes[2] == 0x66 && bytes[3] == 0x66 {
+        return "caf"
+    }
+    // ftyp (offset 4) = M4A/MP4
+    if bytes[4] == 0x66 && bytes[5] == 0x74 && bytes[6] == 0x79 && bytes[7] == 0x70 {
+        return "m4a"
+    }
+    return nil
 }
 
 // MARK: - Microphone Listening

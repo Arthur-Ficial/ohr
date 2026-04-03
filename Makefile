@@ -2,7 +2,7 @@ PREFIX ?= /usr/local
 BINARY = ohr
 VERSION_FILE = .version
 
-.PHONY: check-toolchain build install uninstall clean bump-patch bump-minor bump-major generate-build-info update-readme version release-minor release-major package-release-asset print-release-asset print-release-sha256
+.PHONY: check-toolchain build install uninstall clean bump-patch bump-minor bump-major generate-build-info version release-minor release-major package-release-asset print-release-asset print-release-sha256 update-homebrew-formula
 
 # --- Environment checks ---
 
@@ -145,3 +145,17 @@ print-release-sha256:
 		exit 1; \
 	fi; \
 	shasum -a 256 "$$asset" | awk '{print $$1}'
+
+update-homebrew-formula:
+	@if [ -z "$(HOMEBREW_FORMULA_OUTPUT)" ]; then \
+		echo "error: set HOMEBREW_FORMULA_OUTPUT=/path/to/Formula/ohr.rb"; \
+		exit 1; \
+	fi
+	@if [ -z "$(HOMEBREW_FORMULA_SHA256)" ]; then \
+		echo "error: set HOMEBREW_FORMULA_SHA256=<sha256>"; \
+		exit 1; \
+	fi
+	@./scripts/write-homebrew-formula.sh \
+		--version "$$(cat $(VERSION_FILE))" \
+		--sha256 "$(HOMEBREW_FORMULA_SHA256)" \
+		--output "$(HOMEBREW_FORMULA_OUTPUT)"
