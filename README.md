@@ -158,6 +158,45 @@ curl -X POST http://localhost:11434/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=vtt
 ```
 
+## Demos
+
+See [`demo/`](./demo/) for real-world shell scripts powered by ohr.
+
+**[subtitle](./demo/subtitle)** — generate subtitles:
+```bash
+demo/subtitle lecture.m4a --save           # saves lecture.srt next to file
+```
+
+**[audio-grep](./demo/audio-grep)** — search inside audio files:
+```bash
+demo/audio-grep "budget" meetings/*.m4a    # find mentions with timestamps
+demo/audio-grep -c "deadline" *.m4a        # count matches per file
+```
+
+**[minutes](./demo/minutes)** — meeting to minutes (ohr + apfel):
+```bash
+demo/minutes standup.m4a -o markdown > standup.md
+```
+
+**[batch-transcribe](./demo/batch-transcribe)** — transcribe a whole folder:
+```bash
+demo/batch-transcribe ~/recordings/ -o srt
+```
+
+**[whisper-compat](./demo/whisper-compat)** — drop-in Whisper CLI replacement:
+```bash
+demo/whisper-compat audio.m4a --output_format srt --language en
+```
+
+Also in `demo/`:
+- **[dictate](./demo/dictate)** — speak into a text file via microphone
+- **[live-caption](./demo/live-caption)** — real-time captions in the terminal
+- **[voice-search](./demo/voice-search)** — search spoken content across files
+- **[translate-audio](./demo/translate-audio)** — transcribe then translate (ohr + apfel)
+- **[action-items](./demo/action-items)** — extract to-dos from meetings (ohr + apfel)
+- **[podcast-chapters](./demo/podcast-chapters)** — timestamped chapter markers (ohr + apfel)
+- **[voice-note](./demo/voice-note)** — record, transcribe, and summarize (ohr + apfel)
+
 ## OpenAI API Compatibility
 
 **Base URL:** `http://localhost:11434/v1`
