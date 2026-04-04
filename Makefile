@@ -2,7 +2,7 @@ PREFIX ?= /usr/local
 BINARY = ohr
 VERSION_FILE = .version
 
-.PHONY: check-toolchain build install uninstall clean bump-patch bump-minor bump-major generate-build-info version release-minor release-major package-release-asset print-release-asset print-release-sha256 update-homebrew-formula
+.PHONY: check-toolchain build install uninstall clean bump-patch bump-minor bump-major generate-build-info update-readme version release-minor release-major package-release-asset print-release-asset print-release-sha256 update-homebrew-formula
 
 # --- Environment checks ---
 
@@ -44,7 +44,7 @@ check-toolchain:
 
 # --- Build (auto-bumps patch) ---
 
-build: check-toolchain bump-patch generate-build-info
+build: check-toolchain bump-patch generate-build-info update-readme
 	swift build -c release
 
 install: build
@@ -85,10 +85,10 @@ bump-major:
 
 # --- Release targets (bump without extra patch increment) ---
 
-release-minor: check-toolchain bump-minor generate-build-info
+release-minor: check-toolchain bump-minor generate-build-info update-readme
 	swift build -c release
 
-release-major: check-toolchain bump-major generate-build-info
+release-major: check-toolchain bump-major generate-build-info update-readme
 	swift build -c release
 
 # --- Generated files ---
@@ -107,6 +107,11 @@ generate-build-info:
 	echo "let buildDate = \"$$date\"" >> Sources/BuildInfo.swift; \
 	echo "let buildSwiftVersion = \"$$swift_ver\"" >> Sources/BuildInfo.swift; \
 	echo "let buildOS = \"macOS $$os_ver\"" >> Sources/BuildInfo.swift
+
+update-readme:
+	@v=$$(cat $(VERSION_FILE)); \
+	sed -i '' 's/Version [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/Version '"$$v"'/' README.md; \
+	sed -i '' 's/version-[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*-blue/version-'"$$v"'-blue/' README.md
 
 # --- Utilities ---
 
