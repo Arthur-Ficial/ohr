@@ -86,36 +86,6 @@ func resolveAndInstallSpeechAsset(for requested: Locale) async throws -> Locale 
     return resolved
 }
 
-// MARK: - Buffer copy
-
-/// Deep-copy a PCM buffer so it outlives the audio tap callback.
-/// Returns nil when the copy fails (different formats, zero-length, etc.).
-func copyPCMBuffer(_ source: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
-    guard let copy = AVAudioPCMBuffer(pcmFormat: source.format, frameCapacity: source.frameCapacity) else {
-        return nil
-    }
-    copy.frameLength = source.frameLength
-    let channelCount = Int(source.format.channelCount)
-    let frames = Int(source.frameLength)
-
-    if let src = source.floatChannelData, let dst = copy.floatChannelData {
-        for c in 0..<channelCount {
-            dst[c].update(from: src[c], count: frames)
-        }
-    } else if let src = source.int16ChannelData, let dst = copy.int16ChannelData {
-        for c in 0..<channelCount {
-            dst[c].update(from: src[c], count: frames)
-        }
-    } else if let src = source.int32ChannelData, let dst = copy.int32ChannelData {
-        for c in 0..<channelCount {
-            dst[c].update(from: src[c], count: frames)
-        }
-    } else {
-        return nil
-    }
-    return copy
-}
-
 // MARK: - Microphone Transcription
 
 /// Stream live transcription from the microphone using SpeechTranscriber.
@@ -133,26 +103,35 @@ func streamMicrophone(language: String? = nil, onSegment: @Sendable @escaping (S
     let resolved = try await resolveAndInstallSpeechAsset(for: locale)
     let transcriber = SpeechTranscriber(locale: resolved, preset: .progressiveTranscription)
 
+    // Ask Speech what audio format the transcriber actually wants. Without
+    // this, feeding the raw mic format (typically 48 kHz Float32) traps
+    // deep inside Speech.framework with SIGTRAP on the cooperative queue.
+    guard let analyzerFormat = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber]) else {
+        throw OhrError.transcriptionFailed("no compatible audio format for SpeechTranscriber")
+    }
+
     let engine = AVAudioEngine()
     let inputNode = engine.inputNode
-    let format = inputNode.outputFormat(forBus: 0)
+    let micFormat = inputNode.outputFormat(forBus: 0)
+
+    // Converter from microphone format to the format Speech expects.
+    guard let converter = AVAudioConverter(from: micFormat, to: analyzerFormat) else {
+        throw OhrError.transcriptionFailed("cannot convert mic format \(micFormat) to analyzer format \(analyzerFormat)")
+    }
 
     let (bufferStream, bufferContinuation) = AsyncStream<AnalyzerInput>.makeStream()
 
-    inputNode.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
-        // Copy the buffer so it outlives the audio thread callback before
-        // SpeechAnalyzer consumes it on its own queue.
-        guard let copy = copyPCMBuffer(buffer) else { return }
-        bufferContinuation.yield(AnalyzerInput(buffer: copy))
+    inputNode.installTap(onBus: 0, bufferSize: 4096, format: micFormat) { buffer, _ in
+        guard let converted = convertBuffer(buffer, with: converter, to: analyzerFormat) else { return }
+        bufferContinuation.yield(AnalyzerInput(buffer: converted))
     }
-
-    // Wiring: construct the analyzer *with* the input sequence and modules.
-    // This is the supported pattern for live audio on macOS 26; the analyzer
-    // reads from the sequence concurrently without a separate .start() call.
-    let _ = SpeechAnalyzer(inputSequence: bufferStream, modules: [transcriber])
 
     engine.prepare()
     try engine.start()
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: analyzerFormat)
+    try await analyzer.start(inputSequence: bufferStream)
 
     defer {
         bufferContinuation.finish()
@@ -168,6 +147,41 @@ func streamMicrophone(language: String? = nil, onSegment: @Sendable @escaping (S
         onSegment(SubtitleSegment(id: segmentId, start: start, end: end, text: text))
         segmentId += 1
     }
+}
+
+// MARK: - Audio Format Conversion
+
+/// Convert a PCM buffer to the target format using the given converter.
+/// Returns nil when the conversion fails or produces no frames.
+func convertBuffer(
+    _ source: AVAudioPCMBuffer,
+    with converter: AVAudioConverter,
+    to targetFormat: AVAudioFormat
+) -> AVAudioPCMBuffer? {
+    let ratio = targetFormat.sampleRate / source.format.sampleRate
+    let capacity = AVAudioFrameCount(Double(source.frameLength) * ratio + 0.5)
+    guard capacity > 0,
+          let output = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: capacity) else {
+        return nil
+    }
+
+    let consumed = UnsafeMutablePointer<Bool>.allocate(capacity: 1)
+    consumed.initialize(to: false)
+    defer { consumed.deallocate() }
+
+    var error: NSError?
+    let status = converter.convert(to: output, error: &error) { _, inputStatus in
+        if consumed.pointee {
+            inputStatus.pointee = .noDataNow
+            return nil
+        }
+        consumed.pointee = true
+        inputStatus.pointee = .haveData
+        return source
+    }
+
+    guard status != .error, output.frameLength > 0 else { return nil }
+    return output
 }
 
 // MARK: - Model Info
