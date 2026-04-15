@@ -50,6 +50,7 @@ suite("SubtitleFormatterTests") { runSubtitleFormatterTests() }
 suite("OpenAIModelsTests") { runOpenAIModelsTests() }
 suite("TranscriptionValidatorTests") { runTranscriptionValidatorTests() }
 suite("OriginValidatorTests") { runOriginValidatorTests() }
+suite("LocaleResolverTests") { runLocaleResolverTests() }
 
 // MARK: - Summary
 

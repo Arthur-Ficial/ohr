@@ -6,5 +6,9 @@
     <string>ohr</string>
     <key>CFBundleIdentifier</key>
     <string>com.arthurficial.ohr</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ohr uses the microphone to transcribe your voice on-device with Apple SpeechAnalyzer. Audio never leaves this Mac.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>ohr uses on-device speech recognition (Apple SpeechAnalyzer) to convert speech to text. No network, no cloud, no API keys.</string>
 </dict>
 </plist>

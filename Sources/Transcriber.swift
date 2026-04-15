@@ -63,6 +63,59 @@ func transcribeFile(url fileURL: URL, language: String? = nil) async throws -> T
     )
 }
 
+/// Resolve the requested locale to a supported one, then ensure its speech
+/// asset is installed. Returns the resolved locale. Throws OhrError on
+/// unsupported language or download failure.
+func resolveAndInstallSpeechAsset(for requested: Locale) async throws -> Locale {
+    let supported = await SpeechTranscriber.supportedLocales
+    guard let resolved = resolveSupportedLocale(requested: requested, supported: supported) else {
+        throw OhrError.unsupportedLanguage(canonicalLanguageRegion(requested))
+    }
+
+    let target = canonicalLanguageRegion(resolved)
+    let installed = await Set(SpeechTranscriber.installedLocales.map { canonicalLanguageRegion($0) })
+    if installed.contains(target) { return resolved }
+
+    let installer = SpeechTranscriber(locale: resolved, preset: .progressiveTranscription)
+    printStderr(styled("Downloading speech model for \(target) (first run only)...", .dim))
+    guard let request = try await AssetInventory.assetInstallationRequest(supporting: [installer]) else {
+        throw OhrError.transcriptionFailed("speech model for \(target) is not downloadable on this system")
+    }
+    try await request.downloadAndInstall()
+    printStderr(styled("Speech model ready.", .dim))
+    return resolved
+}
+
+// MARK: - Buffer copy
+
+/// Deep-copy a PCM buffer so it outlives the audio tap callback.
+/// Returns nil when the copy fails (different formats, zero-length, etc.).
+func copyPCMBuffer(_ source: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
+    guard let copy = AVAudioPCMBuffer(pcmFormat: source.format, frameCapacity: source.frameCapacity) else {
+        return nil
+    }
+    copy.frameLength = source.frameLength
+    let channelCount = Int(source.format.channelCount)
+    let frames = Int(source.frameLength)
+
+    if let src = source.floatChannelData, let dst = copy.floatChannelData {
+        for c in 0..<channelCount {
+            dst[c].update(from: src[c], count: frames)
+        }
+    } else if let src = source.int16ChannelData, let dst = copy.int16ChannelData {
+        for c in 0..<channelCount {
+            dst[c].update(from: src[c], count: frames)
+        }
+    } else if let src = source.int32ChannelData, let dst = copy.int32ChannelData {
+        for c in 0..<channelCount {
+            dst[c].update(from: src[c], count: frames)
+        }
+    } else {
+        return nil
+    }
+    return copy
+}
+
 // MARK: - Microphone Transcription
 
 /// Stream live transcription from the microphone using SpeechTranscriber.
@@ -70,42 +123,51 @@ func transcribeFile(url fileURL: URL, language: String? = nil) async throws -> T
 /// - Parameters:
 ///   - language: Optional BCP-47 language code. Nil = current locale.
 ///   - onSegment: Callback for each transcribed segment.
-func streamMicrophone(language: String? = nil, onSegment: @Sendable (SubtitleSegment) -> Void) async throws {
+func streamMicrophone(language: String? = nil, onSegment: @Sendable @escaping (SubtitleSegment) -> Void) async throws {
     let locale = language.map { Locale(identifier: $0) } ?? .current
-    let transcriber = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
 
-    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    guard SpeechTranscriber.isAvailable else {
+        throw OhrError.transcriptionFailed("SpeechTranscriber is not available on this system")
+    }
 
-    // Set up audio engine for microphone capture
+    let resolved = try await resolveAndInstallSpeechAsset(for: locale)
+    let transcriber = SpeechTranscriber(locale: resolved, preset: .progressiveTranscription)
+
     let engine = AVAudioEngine()
     let inputNode = engine.inputNode
     let format = inputNode.outputFormat(forBus: 0)
 
-    // Create an async stream of audio buffers
     let (bufferStream, bufferContinuation) = AsyncStream<AnalyzerInput>.makeStream()
 
     inputNode.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
-        bufferContinuation.yield(AnalyzerInput(buffer: buffer))
+        // Copy the buffer so it outlives the audio thread callback before
+        // SpeechAnalyzer consumes it on its own queue.
+        guard let copy = copyPCMBuffer(buffer) else { return }
+        bufferContinuation.yield(AnalyzerInput(buffer: copy))
     }
+
+    // Wiring: construct the analyzer *with* the input sequence and modules.
+    // This is the supported pattern for live audio on macOS 26; the analyzer
+    // reads from the sequence concurrently without a separate .start() call.
+    let _ = SpeechAnalyzer(inputSequence: bufferStream, modules: [transcriber])
 
     engine.prepare()
     try engine.start()
 
-    // Start the analyzer with the audio stream
-    try await analyzer.start(inputSequence: bufferStream)
+    defer {
+        bufferContinuation.finish()
+        engine.stop()
+        inputNode.removeTap(onBus: 0)
+    }
 
     var segmentId = 0
     for try await result in transcriber.results {
         let text = String(result.text.characters)
         let start = CMTimeGetSeconds(result.range.start)
         let end = CMTimeGetSeconds(result.range.end)
-        let segment = SubtitleSegment(id: segmentId, start: start, end: end, text: text)
-        onSegment(segment)
+        onSegment(SubtitleSegment(id: segmentId, start: start, end: end, text: text))
         segmentId += 1
     }
-
-    engine.stop()
-    inputNode.removeTap(onBus: 0)
 }
 
 // MARK: - Model Info
