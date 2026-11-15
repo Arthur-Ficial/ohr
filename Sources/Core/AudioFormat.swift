@@ -1,6 +1,6 @@
 // ============================================================================
-// AudioFormat.swift — Audio format detection and validation
-// Part of ohr — On-device speech-to-text from the command line
+// AudioFormat.swift - Audio format detection and validation
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 /// Supported audio formats for transcription.

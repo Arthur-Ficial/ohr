@@ -1,4 +1,4 @@
-// AudioFormatTests — TDD tests for audio format detection
+// AudioFormatTests - TDD tests for audio format detection
 // Tests extension-based and MIME-type-based format detection
 
 import OhrCore

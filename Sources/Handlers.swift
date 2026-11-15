@@ -1,6 +1,6 @@
 // ============================================================================
-// Handlers.swift — Request handler for transcription endpoint
-// Part of ohr — On-device speech-to-text from the command line
+// Handlers.swift - Request handler for transcription endpoint
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation
@@ -65,10 +65,10 @@ func handleTranscription(
                 temperature = Double(str)
             }
         case "model":
-            // Accept but don't use — we only have one model
+            // Accept but don't use - we only have one model
             break
         case "prompt":
-            // Accept but don't use — SpeechAnalyzer doesn't support prompting
+            // Accept but don't use - SpeechAnalyzer doesn't support prompting
             break
         default:
             break

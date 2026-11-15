@@ -1,4 +1,4 @@
-// ohr-tests — pure Swift test runner, no XCTest/Testing framework needed
+// ohr-tests - pure Swift test runner, no XCTest/Testing framework needed
 // Run: swift run ohr-tests
 
 import Foundation
@@ -20,16 +20,16 @@ func test(_ name: String, _ block: () throws -> Void) {
 }
 
 func assertEqual<T: Equatable>(_ a: T, _ b: T, _ msg: String = "") throws {
-    guard a == b else { throw TestFailure("\(a) != \(b)\(msg.isEmpty ? "" : " — \(msg)")") }
+    guard a == b else { throw TestFailure("\(a) != \(b)\(msg.isEmpty ? "" : " - \(msg)")") }
 }
 func assertNil<T>(_ v: T?, _ msg: String = "") throws {
-    guard v == nil else { throw TestFailure("Expected nil, got \(v!)\(msg.isEmpty ? "" : " — \(msg)")") }
+    guard v == nil else { throw TestFailure("Expected nil, got \(v!)\(msg.isEmpty ? "" : " - \(msg)")") }
 }
 func assertNotNil<T>(_ v: T?, _ msg: String = "") throws {
-    guard v != nil else { throw TestFailure("Expected non-nil\(msg.isEmpty ? "" : " — \(msg)")") }
+    guard v != nil else { throw TestFailure("Expected non-nil\(msg.isEmpty ? "" : " - \(msg)")") }
 }
 func assertTrue(_ v: Bool, _ msg: String = "") throws {
-    guard v else { throw TestFailure("Expected true\(msg.isEmpty ? "" : " — \(msg)")") }
+    guard v else { throw TestFailure("Expected true\(msg.isEmpty ? "" : " - \(msg)")") }
 }
 
 struct TestFailure: Error, CustomStringConvertible {

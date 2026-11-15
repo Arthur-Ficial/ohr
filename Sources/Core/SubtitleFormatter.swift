@@ -1,6 +1,6 @@
 // ============================================================================
-// SubtitleFormatter.swift — SRT and VTT subtitle generation
-// Part of ohr — On-device speech-to-text from the command line
+// SubtitleFormatter.swift - SRT and VTT subtitle generation
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

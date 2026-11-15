@@ -9,13 +9,13 @@ let package = Package(
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
     ],
     targets: [
-        // Pure-logic library — no Speech framework, testable
+        // Pure-logic library -no Speech framework, testable
         .target(
             name: "OhrCore",
             dependencies: [],
             path: "Sources/Core"
         ),
-        // Main executable — depends on OhrCore + Hummingbird + Speech
+        // Main executable -depends on OhrCore + Hummingbird + Speech
         .executableTarget(
             name: "ohr",
             dependencies: [
@@ -33,7 +33,7 @@ let package = Package(
                 ])
             ]
         ),
-        // Test runner — pure Swift, no XCTest/Testing (Command Line Tools only)
+        // Test runner -pure Swift, no XCTest/Testing (Command Line Tools only)
         .executableTarget(
             name: "ohr-tests",
             dependencies: ["OhrCore"],

@@ -1,6 +1,6 @@
 // ============================================================================
-// CLI.swift — Command-line interface commands
-// Part of ohr — On-device speech-to-text from the command line
+// CLI.swift - Command-line interface commands
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation
@@ -53,7 +53,7 @@ func transcribeFileCommand(path: String, language: String?, timestamps: Bool) as
 
 /// Transcribe audio piped via stdin.
 func transcribeFromStdin(language: String?) async throws {
-    // Read raw binary data from stdin directly (not readLine — that corrupts binary audio)
+    // Read raw binary data from stdin directly (not readLine - that corrupts binary audio)
     let data = FileHandle.standardInput.readDataToEndOfFile()
 
     guard !data.isEmpty else {
@@ -202,7 +202,7 @@ func printRelease() {
 /// Print help text.
 func printUsage() {
     let usage = """
-    \(styled("ohr", .cyan, .bold)) — on-device speech-to-text
+    \(styled("ohr", .cyan, .bold)) - on-device speech-to-text
 
     \(styled("USAGE:", .bold))
       ohr <file>                   Transcribe an audio file
@@ -225,7 +225,7 @@ func printUsage() {
 
     \(styled("SERVER OPTIONS:", .bold))
       --serve                      Start HTTP server
-      --port <n>                   Server port (default: 11434, env: OHR_PORT)
+      --port <n>                   Server port (default: 11435, env: OHR_PORT)
       --host <addr>                Bind address (default: 127.0.0.1, env: OHR_HOST)
       --cors                       Enable CORS headers
       --allowed-origins <list>     Comma-separated allowed origins
@@ -254,7 +254,7 @@ func printUsage() {
       m4a, wav, mp3, mp4, caf, aiff, flac
 
     \(styled("ENVIRONMENT:", .bold))
-      OHR_PORT        Server port (default: 11434)
+      OHR_PORT        Server port (default: 11435)
       OHR_HOST        Server bind address (default: 127.0.0.1)
       OHR_TOKEN       Bearer token for server auth
       OHR_LANGUAGE    Default language code

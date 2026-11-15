@@ -1,6 +1,6 @@
 // ============================================================================
-// TranscriptionValidator.swift — Validate transcription request parameters
-// Part of ohr — On-device speech-to-text from the command line
+// TranscriptionValidator.swift - Validate transcription request parameters
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 /// Validation failure types for transcription requests.

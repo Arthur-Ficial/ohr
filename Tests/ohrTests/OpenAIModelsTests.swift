@@ -1,4 +1,4 @@
-// OpenAIModelsTests — TDD tests for transcription API types
+// OpenAIModelsTests - TDD tests for transcription API types
 // Tests response encoding and format type parsing
 
 import Foundation

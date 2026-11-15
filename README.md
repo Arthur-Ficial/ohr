@@ -7,39 +7,34 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![100% On-Device](https://img.shields.io/badge/inference-100%25%20on--device-green)](https://developer.apple.com/documentation/speech)
 
-On-device speech-to-text on your Mac. Transcribe audio files, generate subtitles, stream from the microphone — all locally, no cloud.
+On-device speech-to-text on your Mac. Transcribe audio files, generate subtitles, stream from the microphone - all locally, no cloud.
 
-No API keys. No network. No subscriptions. The speech recognition is already on your computer — ohr lets you use it.
-
-## What is this
-
-Every Mac with Apple Silicon has a **built-in speech recognizer** — Apple's on-device SpeechAnalyzer, shipped as part of the [Speech framework](https://developer.apple.com/documentation/speech) (macOS 26+). **ohr wraps it** in a CLI and an OpenAI-compatible HTTP server — so you can actually use it. All inference runs **on-device**, no network calls.
-
-- **UNIX tool** — `ohr meeting.m4a` — file in, text out. Pipe-friendly, multiple output formats, proper exit codes
-- **Subtitle generator** — `ohr -o srt lecture.wav > lecture.srt` — SRT and VTT with precise timestamps
-- **Live transcription** — `ohr --listen` — real-time microphone input
-- **OpenAI-compatible server** — `ohr --serve` — drop-in replacement for `POST /v1/audio/transcriptions`
-- **Zero cost** — no API keys, no cloud, no subscriptions, 30 languages supported
-
-## Requirements & Install
-
-- Apple Silicon Mac, macOS 26 Tahoe or newer
-- Building from source requires Command Line Tools with macOS 26 SDK (ships Swift 6.3). No Xcode required.
-
-**Homebrew** (recommended):
+## Install
 
 ```bash
 brew tap Arthur-Ficial/tap
-brew install Arthur-Ficial/tap/ohr
+brew install ohr
 ```
 
-**Build from source:**
+Or build from source:
 
 ```bash
 git clone https://github.com/Arthur-Ficial/ohr.git
 cd ohr
 make install
 ```
+
+Requires Apple Silicon Mac, macOS 26 Tahoe or newer. No Xcode required (Command Line Tools with macOS 26 SDK is enough).
+
+## What is this
+
+Every Mac with Apple Silicon has a **built-in speech recognizer** - Apple's on-device SpeechAnalyzer, shipped as part of the [Speech framework](https://developer.apple.com/documentation/speech) (macOS 26+). **ohr wraps it** in a CLI and an OpenAI-compatible HTTP server so you can actually use it. All inference runs **on-device**, no network calls.
+
+- **UNIX tool** - `ohr meeting.m4a` - file in, text out. Pipe-friendly, multiple output formats, proper exit codes
+- **Subtitle generator** - `ohr -o srt lecture.wav > lecture.srt` - SRT and VTT with precise timestamps
+- **Live transcription** - `ohr --listen` - real-time microphone input
+- **OpenAI-compatible server** - `ohr --serve` - drop-in replacement for `POST /v1/audio/transcriptions`
+- **Zero cost** - no API keys, no cloud, no subscriptions, 30 languages supported
 
 ## Quick Start
 
@@ -125,7 +120,7 @@ ohr -l ja-JP recording.m4a     # Japanese
 ohr --serve
 
 # In another terminal:
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@meeting.m4a \
   -F model=apple-speechanalyzer
 ```
@@ -138,23 +133,23 @@ All five response formats:
 
 ```bash
 # JSON (default)
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=json
 
 # Verbose JSON (with segments, timestamps, duration)
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=verbose_json
 
 # Plain text
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=text
 
 # SRT subtitles
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=srt
 
 # WebVTT subtitles
-curl -X POST http://localhost:11434/v1/audio/transcriptions \
+curl -X POST http://localhost:11435/v1/audio/transcriptions \
   -F file=@audio.m4a -F response_format=vtt
 ```
 
@@ -162,44 +157,44 @@ curl -X POST http://localhost:11434/v1/audio/transcriptions \
 
 See [`demo/`](./demo/) for real-world shell scripts powered by ohr.
 
-**[subtitle](./demo/subtitle)** — generate subtitles:
+**[subtitle](./demo/subtitle)** - generate subtitles:
 ```bash
 demo/subtitle lecture.m4a --save           # saves lecture.srt next to file
 ```
 
-**[audio-grep](./demo/audio-grep)** — search inside audio files:
+**[audio-grep](./demo/audio-grep)** - search inside audio files:
 ```bash
 demo/audio-grep "budget" meetings/*.m4a    # find mentions with timestamps
 demo/audio-grep -c "deadline" *.m4a        # count matches per file
 ```
 
-**[minutes](./demo/minutes)** — meeting to minutes (ohr + apfel):
+**[minutes](./demo/minutes)** - meeting to minutes (ohr + apfel):
 ```bash
 demo/minutes standup.m4a -o markdown > standup.md
 ```
 
-**[batch-transcribe](./demo/batch-transcribe)** — transcribe a whole folder:
+**[batch-transcribe](./demo/batch-transcribe)** - transcribe a whole folder:
 ```bash
 demo/batch-transcribe ~/recordings/ -o srt
 ```
 
-**[whisper-compat](./demo/whisper-compat)** — drop-in Whisper CLI replacement:
+**[whisper-compat](./demo/whisper-compat)** - drop-in Whisper CLI replacement:
 ```bash
 demo/whisper-compat audio.m4a --output_format srt --language en
 ```
 
 Also in `demo/`:
-- **[dictate](./demo/dictate)** — speak into a text file via microphone
-- **[live-caption](./demo/live-caption)** — real-time captions in the terminal
-- **[voice-search](./demo/voice-search)** — search spoken content across files
-- **[translate-audio](./demo/translate-audio)** — transcribe then translate (ohr + apfel)
-- **[action-items](./demo/action-items)** — extract to-dos from meetings (ohr + apfel)
-- **[podcast-chapters](./demo/podcast-chapters)** — timestamped chapter markers (ohr + apfel)
-- **[voice-note](./demo/voice-note)** — record, transcribe, and summarize (ohr + apfel)
+- **[dictate](./demo/dictate)** - speak into a text file via microphone
+- **[live-caption](./demo/live-caption)** - real-time captions in the terminal
+- **[voice-search](./demo/voice-search)** - search spoken content across files
+- **[translate-audio](./demo/translate-audio)** - transcribe then translate (ohr + apfel)
+- **[action-items](./demo/action-items)** - extract to-dos from meetings (ohr + apfel)
+- **[podcast-chapters](./demo/podcast-chapters)** - timestamped chapter markers (ohr + apfel)
+- **[voice-note](./demo/voice-note)** - record, transcribe, and summarize (ohr + apfel)
 
 ## OpenAI API Compatibility
 
-**Base URL:** `http://localhost:11434/v1`
+**Base URL:** `http://localhost:11435/v1`
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -297,7 +292,7 @@ cat audio.wav | ohr            Transcribe from stdin
 
 | Flag | Description |
 |------|-------------|
-| `--port <n>` | Server port (default: 11434) |
+| `--port <n>` | Server port (default: 11435) |
 | `--host <addr>` | Bind address (default: 127.0.0.1) |
 | `--cors` | Enable CORS headers for browser clients |
 | `--allowed-origins <origins>` | Add comma-separated allowed origins |
@@ -334,7 +329,7 @@ cat audio.wav | ohr            Transcribe from stdin
 
 | Variable | Description |
 |----------|-------------|
-| `OHR_PORT` | Server port (default: 11434) |
+| `OHR_PORT` | Server port (default: 11435) |
 | `OHR_HOST` | Server bind address (default: 127.0.0.1) |
 | `OHR_TOKEN` | Bearer token for server authentication |
 | `OHR_LANGUAGE` | Default language code |
@@ -350,9 +345,9 @@ HTTP Server (/v1/*) ───┘    (100% on-device, zero network)
 ```
 
 Built with Swift 6.3 strict concurrency. Single `Package.swift`, three targets:
-- `OhrCore` — pure logic library (no Speech framework dependency, unit-testable)
-- `ohr` — executable (CLI + server)
-- `ohr-tests` — 109 unit tests
+- `OhrCore` - pure logic library (no Speech framework dependency, unit-testable)
+- `ohr` - executable (CLI + server)
+- `ohr-tests` - 109 unit tests
 
 **No Xcode required.** Builds and tests with Command Line Tools only.
 

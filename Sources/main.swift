@@ -1,5 +1,5 @@
 // ============================================================================
-// main.swift — Entry point for ohr
+// main.swift - Entry point for ohr
 // On-device speech-to-text from the command line.
 // https://github.com/Arthur-Ficial/ohr
 // ============================================================================
@@ -12,6 +12,7 @@ import OhrCore
 let version = buildVersion
 let appName = "ohr"
 let modelName = "apple-speechanalyzer"
+let ohrDefaultPort = 11435
 
 // MARK: - Exit Codes
 
@@ -68,11 +69,11 @@ if args.isEmpty {
     exit(exitUsageError)
 }
 
-// Parse flags — env vars provide defaults, CLI flags override
+// Parse flags - env vars provide defaults, CLI flags override
 let env = ProcessInfo.processInfo.environment
 var mode: String = "transcribe"
 var cliLanguage: String? = env["OHR_LANGUAGE"]
-var serverPort: Int = Int(env["OHR_PORT"] ?? "") ?? 11434
+var serverPort: Int = Int(env["OHR_PORT"] ?? "") ?? ohrDefaultPort
 var serverHost: String = env["OHR_HOST"] ?? "127.0.0.1"
 var serverCORS: Bool = false
 var serverMaxConcurrent: Int = 5

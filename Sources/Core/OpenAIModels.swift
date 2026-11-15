@@ -1,6 +1,6 @@
 // ============================================================================
-// OpenAIModels.swift — OpenAI transcription API types
-// Part of ohr — On-device speech-to-text from the command line
+// OpenAIModels.swift - OpenAI transcription API types
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation
@@ -18,7 +18,7 @@ public enum ResponseFormatType: String, Codable, Sendable {
 
 // MARK: - Transcription Response (json format)
 
-/// Simple transcription response — matches OpenAI's `json` format.
+/// Simple transcription response - matches OpenAI's `json` format.
 public struct TranscriptionResponse: Encodable, Sendable {
     public let text: String
 

@@ -1,6 +1,6 @@
 // ============================================================================
-// Output.swift — Terminal output helpers (colors, stderr, formatting)
-// Part of ohr — On-device speech-to-text from the command line
+// Output.swift - Terminal output helpers (colors, stderr, formatting)
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

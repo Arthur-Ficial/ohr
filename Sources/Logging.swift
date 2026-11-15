@@ -1,6 +1,6 @@
 // ============================================================================
-// Logging.swift — Request logging with ring buffer and query API
-// Part of ohr — On-device speech-to-text from the command line
+// Logging.swift - Request logging with ring buffer and query API
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

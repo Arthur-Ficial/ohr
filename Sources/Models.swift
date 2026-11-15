@@ -1,6 +1,6 @@
 // ============================================================================
-// Models.swift — Data types for CLI and server responses
-// Part of ohr — On-device speech-to-text from the command line
+// Models.swift - Data types for CLI and server responses
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

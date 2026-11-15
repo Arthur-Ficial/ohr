@@ -1,4 +1,4 @@
-// OhrErrorTests — TDD tests for speech-to-text error classification
+// OhrErrorTests - TDD tests for speech-to-text error classification
 // Tests error classification, labels, HTTP codes, and OpenAI types
 
 import Foundation

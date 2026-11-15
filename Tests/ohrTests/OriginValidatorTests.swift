@@ -1,4 +1,4 @@
-// OriginValidatorTests — TDD tests for localhost CSRF protection
+// OriginValidatorTests - TDD tests for localhost CSRF protection
 // Tests origin validation and token authentication logic
 
 import OhrCore

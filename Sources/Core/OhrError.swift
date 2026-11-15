@@ -1,6 +1,6 @@
 // ============================================================================
-// OhrError.swift — Speech-to-text error classification
-// Part of ohr — On-device speech-to-text from the command line
+// OhrError.swift - Speech-to-text error classification
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

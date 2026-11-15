@@ -1,6 +1,6 @@
 // ============================================================================
 // OriginValidator.swift - Localhost CSRF protection logic
-// Part of ohr — On-device speech-to-text from the command line
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 /// Pure validation logic for origin checking and token authentication.

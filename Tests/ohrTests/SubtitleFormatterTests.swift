@@ -1,4 +1,4 @@
-// SubtitleFormatterTests — TDD tests for SRT and VTT subtitle generation
+// SubtitleFormatterTests - TDD tests for SRT and VTT subtitle generation
 // Tests timestamp formatting, segment numbering, and edge cases
 
 import OhrCore

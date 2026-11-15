@@ -1,6 +1,6 @@
 // ============================================================================
-// Server.swift — OpenAI-compatible HTTP server for transcription
-// Part of ohr — On-device speech-to-text from the command line
+// Server.swift - OpenAI-compatible HTTP server for transcription
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation
@@ -38,12 +38,12 @@ final class ServerState: Sendable {
     }
 }
 
-/// Global server state — set once at startup, read by handlers.
+/// Global server state - set once at startup, read by handlers.
 nonisolated(unsafe) var serverState: ServerState!
 
 /// Retry helper for semaphore timeout.
 struct SemaphoreTimeoutError: Error, LocalizedError {
-    var errorDescription: String? { "Request queued too long — server at max concurrent capacity" }
+    var errorDescription: String? { "Request queued too long - server at max concurrent capacity" }
 }
 
 /// Async semaphore for limiting concurrent operations.

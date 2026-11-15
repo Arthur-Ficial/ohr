@@ -11,7 +11,7 @@ Real-world shell scripts powered by ohr (and some by ohr + apfel).
 | **[subtitle](./subtitle)** | Generate SRT/VTT subtitles for any audio file |
 | **[batch-transcribe](./batch-transcribe)** | Transcribe all audio files in a directory at once |
 | **[voice-search](./voice-search)** | Search inside audio files by spoken content |
-| **[audio-grep](./audio-grep)** | grep-like interface for audio — pattern matching with timestamps |
+| **[audio-grep](./audio-grep)** | grep-like interface for audio - pattern matching with timestamps |
 | **[dictate](./dictate)** | Speak into a text file using live microphone |
 | **[live-caption](./live-caption)** | Real-time captions displayed in the terminal |
 | **[whisper-compat](./whisper-compat)** | Drop-in replacement for OpenAI Whisper CLI |

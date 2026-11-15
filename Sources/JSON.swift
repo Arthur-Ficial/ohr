@@ -1,6 +1,6 @@
 // ============================================================================
-// JSON.swift — JSON encoding helpers
-// Part of ohr — On-device speech-to-text from the command line
+// JSON.swift - JSON encoding helpers
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

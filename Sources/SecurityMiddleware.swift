@@ -1,6 +1,6 @@
 // ============================================================================
 // SecurityMiddleware.swift - Origin check, token auth, and CORS handling
-// Part of ohr — On-device speech-to-text from the command line
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation

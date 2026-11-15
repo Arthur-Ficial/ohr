@@ -1,4 +1,4 @@
-// TranscriptionValidatorTests — TDD tests for transcription request validation
+// TranscriptionValidatorTests - TDD tests for transcription request validation
 // Tests format, temperature, language, and field validation
 
 import OhrCore

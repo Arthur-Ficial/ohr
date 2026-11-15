@@ -1,6 +1,6 @@
 // ============================================================================
-// Transcriber.swift — SpeechAnalyzer wrapper for file and mic transcription
-// Part of ohr — On-device speech-to-text from the command line
+// Transcriber.swift - SpeechAnalyzer wrapper for file and mic transcription
+// Part of ohr - On-device speech-to-text from the command line
 // ============================================================================
 
 import Foundation
